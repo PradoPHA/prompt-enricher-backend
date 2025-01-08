@@ -28,6 +28,6 @@ Este é o back-end do sistema **Prompt Enricher**, desenvolvido com Python e Fas
 ---
 
 ## **Observações**
-- Certifique-se de utilizar o terminal **bash** para todos os comandos.
+- Certifique-se de utilizar o terminal **bash** para todos os comandos relativos ao desenvolvimento e o terminal **powershell** para todos os comantos relativos ao Git.
 - Antes de subir novas alterações, adicione as dependências ao `requirements.txt` com o comando:
   pip freeze > requirements.txt
