@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.controller.prompt_controller import router as prompt_router
+import nltk
 
 app = FastAPI()
 

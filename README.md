@@ -12,9 +12,17 @@ Este é o back-end do sistema **Prompt Enricher**, desenvolvido com Python e Fas
    Instale as bibliotecas necessárias:  
    pip install -r requirements.txt
 
+   OBS.: É necessário instalar as dependências abaixo para executar o projeto:
+      nltk.download("punkt")
+      nltk.download("stopwords")
+      nltk.download('punkt_tab')
+
 3. **Rodar o servidor**  
-   Inicie o servidor localmente com o comando:  
-   PYTHONPATH=src uvicorn src.app.main:app --host localhost --reload
+   Antes de iniciar o servidor, rode o comando a seguir, pois ele irá preparar o NLTK (Natural Language Toolkit):
+      python setup_nltk.py
+
+   Feito isso, inicie o servidor localmente com o comando:  
+      PYTHONPATH=src uvicorn src.app.main:app --host localhost --reload
 
    OBS.:
    - host localhost: Define que o servidor usará localhost como endereço.
