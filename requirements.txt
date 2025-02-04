@@ -2,3 +2,5 @@ fastapi
 uvicorn
 nltk
 owlready2
+transformers
+spacy
