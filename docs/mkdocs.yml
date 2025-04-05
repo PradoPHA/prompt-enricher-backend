@@ -1,4 +1,5 @@
 site_name: Documentação - Prompt Enricher Backend
+site_url: https://pradopha.github.io/prompt-enricher-backend/
 nav:
   - Início: index.md
   - Instalação: instalacao.md
