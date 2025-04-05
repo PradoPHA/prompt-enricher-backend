@@ -1,6 +1,8 @@
 fastapi
 uvicorn
-nltk
 owlready2
 transformers
+sentence_transformers
 spacy
+mkdocs
+mkdocs-material

@@ -1,11 +1,24 @@
 import owlready2
 from owlready2 import get_ontology
-from app.service.similarity_service import compute_similarity, filter_relevant_terms, is_prompt_related
+from app.service.similarity_service import compute_similarity, is_prompt_related
 
 ontology_path = "public/ontology/MFOEM.owl"
 onto = get_ontology(ontology_path).load()
 
-def search_ontology(term, key_terms, threshold):
+def search_ontology(term, key_terms, threshold, prompt):
+    """
+    Searches the ontology for entities related to the given term and filters them based on relevance.
+
+    Args:
+        term (str): The term to search for in the ontology.
+        key_terms (list): A list of key terms extracted from the prompt.
+        threshold (float): The similarity threshold for filtering relevant entities.
+        prompt (str): The original prompt provided by the user.
+
+    Returns:
+        list: A list of dictionaries containing information about the matched ontology entities,
+              including their parents, children, siblings, and ancestors with similarity scores.
+    """
     results = []
     for entity in onto.classes():
         labels = entity.label or []  # Garantir que entity.label seja iterável
@@ -17,17 +30,45 @@ def search_ontology(term, key_terms, threshold):
                 entity_siblings = get_entity_siblings(entity)
                 entity_ancestors = get_entity_ancestors(entity)
 
+                # Calculate similarity for each relationship
+                # Convert locstr to plain strings
+                parent_similarities = [
+                    {"term": str(parent), "similarity": float(compute_similarity(prompt, str(parent)))}
+                    for parent in entity_parents
+                ]
+                child_similarities = [
+                    {"term": str(child), "similarity": float(compute_similarity(prompt, str(child)))}
+                    for child in entity_children
+                ]
+                sibling_similarities = [
+                    {"term": str(sibling), "similarity": float(compute_similarity(prompt, str(sibling)))}
+                    for sibling in entity_siblings
+                ]
+                ancestor_similarities = [
+                    {"term": str(ancestor), "similarity": float(compute_similarity(prompt, str(ancestor)))}
+                    for ancestor in entity_ancestors
+                ]
+
                 results.append({
                     "identifier": entity.name,
                     "label": label,
-                    "parents": entity_parents,
-                    "children": entity_children,
-                    "siblings": entity_siblings,
-                    "ancestors": entity_ancestors,
+                    "parents": parent_similarities,
+                    "children": child_similarities,
+                    "siblings": sibling_similarities,
+                    "ancestors": ancestor_similarities,
                 })
     return results
 
 def get_entity_parents(entity):
+    """
+    Retrieves the parent entities of the given ontology entity.
+
+    Args:
+        entity (owlready2.ThingClass): The ontology entity for which to retrieve parents.
+
+    Returns:
+        list: A list of parent labels (strings) for the given entity.
+    """
     parents = []
     for parent in entity.is_a:
         if isinstance(parent, owlready2.ThingClass) and parent.label:
@@ -35,6 +76,15 @@ def get_entity_parents(entity):
     return parents
 
 def get_entity_children(entity):
+    """
+    Retrieves the child entities of the given ontology entity.
+
+    Args:
+        entity (owlready2.ThingClass): The ontology entity for which to retrieve children.
+
+    Returns:
+        list: A list of child labels (strings) for the given entity.
+    """
     children = []
     for child in entity.subclasses():
         if child.label:
@@ -42,6 +92,15 @@ def get_entity_children(entity):
     return children
 
 def get_entity_siblings(entity):
+    """
+    Retrieves the sibling entities of the given ontology entity.
+
+    Args:
+        entity (owlready2.ThingClass): The ontology entity for which to retrieve siblings.
+
+    Returns:
+        list: A list of sibling labels (strings) for the given entity.
+    """
     siblings = []
     for parent in entity.is_a:
         if isinstance(parent, owlready2.ThingClass):
@@ -51,6 +110,15 @@ def get_entity_siblings(entity):
     return siblings
 
 def get_entity_ancestors(entity):
+    """
+    Retrieves the ancestor entities of the given ontology entity.
+
+    Args:
+        entity (owlready2.ThingClass): The ontology entity for which to retrieve ancestors.
+
+    Returns:
+        list: A list of ancestor labels (strings) for the given entity, with duplicates removed.
+    """
     ancestors = []
     for parent in entity.is_a:
         if isinstance(parent, owlready2.ThingClass):
@@ -58,81 +126,3 @@ def get_entity_ancestors(entity):
             # Recursivamente buscar ancestrais
             ancestors.extend(get_entity_ancestors(parent))
     return list(set(ancestors))  # Remover duplicatas
-
-def expand_prompt(original_prompt, ontology_matches, key_terms, threshold):
-    # Iniciar com o prompt original
-    enriched_prompt = original_prompt
-
-    # Lista para armazenar frases adicionais
-    additional_phrases = []
-
-    max_questions_per_term = 3  # Número de perguntas por termo
-    total_questions_limit = 15  # Limite total de perguntas
-    total_questions = 0
-
-    for term in key_terms:
-        if term in ontology_matches:
-            matches = ontology_matches[term]
-            if matches:
-                # Ordenar matches por relevância semântica em relação ao prompt
-                matches = sorted(matches, key=lambda match: compute_similarity(term, match["label"]), reverse=True)
-                questions_per_term = 0
-                for match in matches:
-                    if total_questions >= total_questions_limit or questions_per_term >= max_questions_per_term:
-                        break
-
-                    term_label = match.get("label", "")
-                    parents = match.get("parents", [])
-                    children = match.get("children", [])
-                    siblings = match.get("siblings", [])
-                    ancestors = match.get("ancestors", [])
-
-                    # Filtrar relações por relevância semântica com um limiar mais alto
-                    relevant_parents = filter_relevant_terms(parents, original_prompt, threshold)
-                    relevant_children = filter_relevant_terms(children, original_prompt, threshold)
-                    relevant_siblings = filter_relevant_terms(siblings, original_prompt, threshold)
-                    relevant_ancestors = filter_relevant_terms(ancestors, original_prompt, threshold)
-
-                    # Adicionar frases relacionadas a pais, filhos, irmãos e ancestrais
-                    if relevant_parents and total_questions < total_questions_limit and questions_per_term < max_questions_per_term:
-                        phrase = generate_dynamic_phrase(term_label, relevant_parents[:1], "influenced by")
-                        additional_phrases.append(phrase)
-                        total_questions += 1
-                        questions_per_term += 1
-
-                    if relevant_children and total_questions < total_questions_limit and questions_per_term < max_questions_per_term:
-                        phrase = generate_dynamic_phrase(term_label, relevant_children[:1], "related to")
-                        additional_phrases.append(phrase)
-                        total_questions += 1
-                        questions_per_term += 1
-
-                    if relevant_siblings and total_questions < total_questions_limit and questions_per_term < max_questions_per_term:
-                        phrase = generate_dynamic_phrase(term_label, relevant_siblings[:1], "related to")
-                        additional_phrases.append(phrase)
-                        total_questions += 1
-                        questions_per_term += 1
-
-                    if relevant_ancestors and total_questions < total_questions_limit and questions_per_term < max_questions_per_term:
-                        phrase = generate_dynamic_phrase(term_label, relevant_ancestors[:1], "rooted in")
-                        additional_phrases.append(phrase)
-                        total_questions += 1
-                        questions_per_term += 1
-
-    enriched_prompt += " " + " ".join(additional_phrases)
-    return enriched_prompt
-
-def generate_dynamic_phrase(term, related_terms, relationship):
-    """
-    Gera uma frase dinâmica com base no termo, termos relacionados e o tipo de relação.
-    """
-    if relationship == "influenced by":
-        return f"Considering that {term} is influenced by {', '.join(related_terms)}, how might this play a role in the process?"
-    elif relationship == "affects":
-        return f"Additionally, since {term} affects {', '.join(related_terms)}, what impact could this have?"
-    elif relationship == "related to":
-        return f"Interestingly, {term} is related to {', '.join(related_terms)}. How might this connection be significant?"
-    elif relationship == "rooted in":
-        return f"Fundamentally, {term} is rooted in {', '.join(related_terms)}. What broader implications does this suggest?"
-    else:
-        return f"The term {term} has a relationship with {', '.join(related_terms)}. How might this be important?"
-

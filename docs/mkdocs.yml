@@ -1,0 +1,10 @@
+site_name: Documentação - Prompt Enricher Backend
+nav:
+  - Início: index.md
+  - Instalação: instalacao.md
+  - API: api.md
+  - Estrutura do Projeto: estrutura.md
+  - Serviços: servicos.md
+  # - Fluxo de Execução: fluxo.md
+theme:
+  name: material
