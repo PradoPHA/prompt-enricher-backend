@@ -1,7 +1,4 @@
 venv/
-src/app/__pycache__/
-src/app/controller/__pycache__/
-src/app/service/__pycache__/
-src/app/models/__pycache__/
-src/app/utils/__pycache__/
+site/
+__pycache__/
 *.pyc
