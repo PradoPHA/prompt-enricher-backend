@@ -32,12 +32,12 @@ def filter_relevant_terms(similarity_dicts, threshold):
     Returns:
         list: A list of terms (strings) that have a similarity score greater than or equal to the threshold.
     """
-    if not similarity_dicts:  # Handle empty lists
+    if not similarity_dicts:  
         return []
 
     return [
         item["term"] for item in similarity_dicts
-        if item.get("similarity", 0) >= threshold  # Use .get() to avoid KeyError
+        if item.get("similarity", 0) >= threshold  
     ]
 
 

@@ -1,16 +1,20 @@
 # Prompt Enricher Backend
 
-Este é o back-end do sistema **Prompt Enricher**, desenvolvido com Python e FastAPI. Ele permite o enriquecimento de prompts utilizando processamento de linguagem natural e ontologias.
+Este é o back-end do sistema **Prompt Enricher**, desenvolvido com Python (3.11) e FastAPI. Ele permite o enriquecimento de prompts utilizando processamento de linguagem natural e ontologias.
 
 ## **Como configurar o projeto**
 
 1. **Ativar o ambiente virtual**  
-   No terminal bash, execute:  
+   No terminal bash, execute:
+   python -m venv venv
    source venv/Scripts/activate
 
 2. **Instalar as dependências**  
    Instale as bibliotecas necessárias:  
    pip install -r requirements.txt
+
+   Após a instalação dos requisitos, instalar o modelo de linguagem em inglês en_core_web_sm. Rode o comando:
+   
 
 3. **Rodar o servidor**  
    Inicie o servidor localmente com o comando:  
