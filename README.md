@@ -14,6 +14,8 @@ Este é o back-end do sistema **Prompt Enricher**, desenvolvido com Python (3.11
    pip install -r requirements.txt
 
    Após a instalação dos requisitos, instalar o modelo de linguagem em inglês en_core_web_sm. Rode o comando:
+
+   python -m spacy download en_core_web_sm
    
 
 3. **Rodar o servidor**  
