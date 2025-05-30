@@ -20,7 +20,7 @@ Este é o back-end do sistema **Prompt Enricher**, desenvolvido com Python (3.11
 
 3. **Rodar o servidor**  
    Inicie o servidor localmente com o comando:  
-    PYTHONPATH=src uvicorn src.app.main:app --host localhost --reload
+    PYTHONPATH=src python -m uvicorn src.app.main:app --host localhost --reload
 
    OBS.:
 
