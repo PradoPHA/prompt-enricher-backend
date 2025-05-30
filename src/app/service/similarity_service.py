@@ -1,7 +1,24 @@
 import numpy as np
 from sentence_transformers import SentenceTransformer
+import logging
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
+# Global variable to store the model (lazy loading)
+_model = None
+
+def get_model():
+    """
+    Lazy loading of the SentenceTransformer model.
+    This prevents issues during import and allows the app to start even if model loading fails.
+    """
+    global _model
+    if _model is None:
+        try:
+            _model = SentenceTransformer('all-MiniLM-L6-v2')
+            logging.info("SentenceTransformer model loaded successfully")
+        except Exception as e:
+            logging.error(f"Failed to load SentenceTransformer model: {e}")
+            raise e
+    return _model
 
 def compute_similarity(term, label):
     """
@@ -14,12 +31,17 @@ def compute_similarity(term, label):
     Returns:
         float: The cosine similarity between the embeddings of the term and the label.
     """
-    term_embedding = model.encode(term)
-    label_embedding = model.encode(label)
-    
-    # Cálculo da similaridade de cosseno entre os embeddings
-    cosine_sim = np.dot(term_embedding, label_embedding) / (np.linalg.norm(term_embedding) * np.linalg.norm(label_embedding))
-    return cosine_sim
+    try:
+        model = get_model()
+        term_embedding = model.encode(term)
+        label_embedding = model.encode(label)
+        
+        # Cálculo da similaridade de cosseno entre os embeddings
+        cosine_sim = np.dot(term_embedding, label_embedding) / (np.linalg.norm(term_embedding) * np.linalg.norm(label_embedding))
+        return cosine_sim
+    except Exception as e:
+        logging.error(f"Error computing similarity: {e}")
+        return 0.0
 
 def filter_relevant_terms(similarity_dicts, threshold):
     """
