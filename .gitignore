@@ -2,29 +2,3 @@ venv/
 site/
 __pycache__/
 *.pyc
-
-# Environment variables
-.env
-.env.local
-.env.production
-
-# Railway
-.railway/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-logs/
-
-# Temporary files
-*.tmp
-*.temp
