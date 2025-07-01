@@ -1,4 +1,5 @@
 import random
+import string
 from app.service.similarity_service import filter_relevant_terms
 
 PHRASE_TEMPLATES = {
@@ -29,6 +30,22 @@ PHRASE_TEMPLATES = {
     ]
 }
 
+def has_ending_punctuation(text):
+    """
+    Checks if the given text ends with a punctuation mark.
+    
+    Args:
+        text (str): The text to check.
+        
+    Returns:
+        bool: True if the text ends with punctuation, False otherwise.
+    """
+    if not text or not text.strip():
+        return False
+    
+    ending_punctuation = '.!?;:'
+    return text.strip()[-1] in ending_punctuation
+
 def expand_prompt(original_prompt, ontology_matches, key_terms, threshold):
     """
     Expands the original prompt by generating additional phrases based on ontology matches.
@@ -42,7 +59,11 @@ def expand_prompt(original_prompt, ontology_matches, key_terms, threshold):
     Returns:
         str: The enriched prompt with additional phrases based on ontology relationships.
     """
-    enriched_prompt = original_prompt
+    if not has_ending_punctuation(original_prompt):
+        enriched_prompt = original_prompt.rstrip() + "."
+    else:
+        enriched_prompt = original_prompt
+    
     additional_phrases = []
 
     max_questions_per_term = 3

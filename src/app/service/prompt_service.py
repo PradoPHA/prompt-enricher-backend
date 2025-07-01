@@ -4,7 +4,6 @@ from app.service.ontology_service import search_ontology
 from app.service.new_content_service import expand_prompt
 from pydantic import BaseModel
 
-# Mapping of precision levels to threshold arrays
 PRECISION_THRESHOLDS = {
     "very_low_precision": [0.2, 0.15, 0.1, 0.05],
     "low_precision": [0.4, 0.35, 0.3, 0.25],
